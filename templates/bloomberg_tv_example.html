@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloomberg TV 西班牙实验报告 (4.15-4.25)</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #333; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 8px; color: #1a1a2e; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .section-title { font-size: 18px; font-weight: 600; margin: 30px 0 15px; color: #1a1a2e; border-left: 4px solid #4a90d9; padding-left: 12px; }
+        .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+        .card .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+        .card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+        .card .change { font-size: 14px; margin-top: 4px; }
+        .card .change.up { color: #10b981; }
+        .card .change.down { color: #ef4444; }
+        .card .change.neutral { color: #6b7280; }
+        .chart-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .chart { width: 100%; height: 380px; }
+        .chart-half { width: 100%; height: 320px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .conclusion { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .conclusion h3 { margin-bottom: 12px; color: #1a1a2e; }
+        .conclusion ul { padding-left: 20px; line-height: 2; }
+        .conclusion li { margin-bottom: 4px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+        .tag-green { background: #d1fae5; color: #065f46; }
+        .tag-red { background: #fee2e2; color: #991b1b; }
+        .tag-gray { background: #f3f4f6; color: #374151; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #f8fafc; font-weight: 600; color: #555; }
+        tr:hover { background: #f8fafc; }
+        .phase-tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+        .phase1 { background: #dbeafe; color: #1e40af; }
+        .phase2 { background: #fef3c7; color: #92400e; }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Bloomberg TV (66888) 西班牙 DHM 实验报告</h1>
+    <p class="subtitle">实验周期：2026.4.15 - 4.25 | 地区：西班牙(ES) | 剔除单日播放>12h用户</p>
+
+    <!-- KPI Cards -->
+    <div class="section-title">核心指标概览（日均）</div>
+    <div class="card-row">
+        <div class="card">
+            <div class="label">Bloomberg UV 提升</div>
+            <div class="value" style="color:#4a90d9;">+2,152%</div>
+            <div class="change neutral">106 → 2,387 (阶段一)</div>
+        </div>
+        <div class="card">
+            <div class="label">Bloomberg 时长提升</div>
+            <div class="value" style="color:#4a90d9;">+8,762%</div>
+            <div class="change neutral">1.91h → 169.3h (阶段一)</div>
+        </div>
+        <div class="card">
+            <div class="label">Bloomberg 人均时长提升</div>
+            <div class="value" style="color:#10b981;">+294%</div>
+            <div class="change neutral">1.08min → 4.25min</div>
+        </div>
+        <div class="card">
+            <div class="label">大盘人均时长影响</div>
+            <div class="value" style="color:#6b7280;">+1.7%</div>
+            <div class="change neutral">37.2min → 37.8min (不显著)</div>
+        </div>
+    </div>
+
+    <!-- Bloomberg UV Chart -->
+    <div class="section-title">Bloomberg TV 每日播放 UV 对比</div>
+    <div class="chart-container">
+        <div id="chart_bloomberg_uv" class="chart"></div>
+    </div>
+
+    <!-- Bloomberg Hours Chart -->
+    <div class="section-title">Bloomberg TV 每日播放时长对比</div>
+    <div class="chart-container">
+        <div id="chart_bloomberg_hours" class="chart"></div>
+    </div>
+
+    <!-- 大盘 per-user -->
+    <div class="section-title">西班牙大盘人均播放时长对比</div>
+    <div class="chart-container">
+        <div id="chart_es_avg" class="chart"></div>
+    </div>
+
+    <!-- 大盘 UV -->
+    <div class="grid-2">
+        <div class="chart-container">
+            <div id="chart_es_uv" class="chart-half"></div>
+        </div>
+        <div class="chart-container">
+            <div id="chart_es_hours" class="chart-half"></div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="section-title">详细数据表</div>
+    <div class="chart-container" style="overflow-x:auto;">
+        <span class="phase-tag phase1">阶段一：4.15-4.21 (各30%流量)</span>
+        <table>
+            <thead>
+                <tr><th>日期</th><th>组别</th><th>Bloomberg 时长(h)</th><th>Bloomberg UV</th><th>Bloomberg 人均(min)</th><th>大盘时长(h)</th><th>大盘 UV</th><th>大盘人均(min)</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>4.15</td><td>对照</td><td>0.27</td><td>33</td><td>0.49</td><td>16,408.0</td><td>28,053</td><td>35.1</td></tr>
+                <tr style="background:#f0f7ff"><td>4.15</td><td>实验</td><td>51.8</td><td>706</td><td>4.40</td><td>17,070.1</td><td>28,028</td><td>36.6</td></tr>
+                <tr><td>4.16</td><td>对照</td><td>1.30</td><td>110</td><td>0.71</td><td>16,617.0</td><td>28,078</td><td>35.5</td></tr>
+                <tr style="background:#f0f7ff"><td>4.16</td><td>实验</td><td>176.3</td><td>2,238</td><td>4.73</td><td>17,266.3</td><td>27,821</td><td>37.2</td></tr>
+                <tr><td>4.17</td><td>对照</td><td>3.58</td><td>123</td><td>1.75</td><td>16,589.5</td><td>27,118</td><td>36.7</td></tr>
+                <tr style="background:#f0f7ff"><td>4.17</td><td>实验</td><td>177.7</td><td>2,210</td><td>4.83</td><td>17,025.7</td><td>27,099</td><td>37.7</td></tr>
+                <tr><td>4.18</td><td>对照</td><td>2.32</td><td>119</td><td>1.17</td><td>18,223.4</td><td>29,135</td><td>37.5</td></tr>
+                <tr style="background:#f0f7ff"><td>4.18</td><td>实验</td><td>177.3</td><td>2,697</td><td>3.94</td><td>17,550.4</td><td>29,233</td><td>36.0</td></tr>
+                <tr><td>4.19</td><td>对照</td><td>0.73</td><td>130</td><td>0.34</td><td>17,981.0</td><td>30,648</td><td>35.2</td></tr>
+                <tr style="background:#f0f7ff"><td>4.19</td><td>实验</td><td>208.3</td><td>3,157</td><td>3.96</td><td>18,472.8</td><td>30,231</td><td>36.7</td></tr>
+                <tr><td>4.20</td><td>对照</td><td>3.28</td><td>130</td><td>1.51</td><td>17,991.2</td><td>28,021</td><td>38.5</td></tr>
+                <tr style="background:#f0f7ff"><td>4.20</td><td>实验</td><td>182.0</td><td>2,479</td><td>4.40</td><td>19,106.9</td><td>27,944</td><td>41.0</td></tr>
+                <tr><td>4.21</td><td>对照</td><td>1.90</td><td>98</td><td>1.16</td><td>19,219.6</td><td>27,640</td><td>41.7</td></tr>
+                <tr style="background:#f0f7ff"><td>4.21</td><td>实验</td><td>211.6</td><td>2,221</td><td>5.72</td><td>18,237.4</td><td>27,626</td><td>39.6</td></tr>
+            </tbody>
+        </table>
+        <br>
+        <span class="phase-tag phase2">阶段二：4.22-4.25 (各25%流量)</span>
+        <table>
+            <thead>
+                <tr><th>日期</th><th>组别</th><th>Bloomberg 时长(h)</th><th>Bloomberg UV</th><th>Bloomberg 人均(min)</th><th>大盘时长(h)</th><th>大盘 UV</th><th>大盘人均(min)</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>4.22</td><td>对照</td><td>5.06</td><td>93</td><td>3.26</td><td>15,190.5</td><td>25,085</td><td>36.3</td></tr>
+                <tr style="background:#fffbeb"><td>4.22</td><td>实验</td><td>214.3</td><td>2,195</td><td>5.86</td><td>15,005.8</td><td>25,090</td><td>35.9</td></tr>
+                <tr><td>4.23</td><td>对照</td><td>4.42</td><td>88</td><td>3.01</td><td>15,677.8</td><td>24,840</td><td>37.9</td></tr>
+                <tr style="background:#fffbeb"><td>4.23</td><td>实验</td><td>139.4</td><td>2,061</td><td>4.06</td><td>15,072.5</td><td>24,547</td><td>36.8</td></tr>
+                <tr><td>4.24</td><td>对照</td><td>4.42</td><td>103</td><td>2.58</td><td>15,258.8</td><td>24,087</td><td>38.0</td></tr>
+                <tr style="background:#fffbeb"><td>4.24</td><td>实验</td><td>153.5</td><td>1,961</td><td>4.70</td><td>14,453.3</td><td>24,049</td><td>36.1</td></tr>
+                <tr><td>4.25</td><td>对照</td><td>1.43</td><td>98</td><td>0.88</td><td>15,606.1</td><td>28,271</td><td>33.1</td></tr>
+                <tr style="background:#fffbeb"><td>4.25</td><td>实验</td><td>121.5</td><td>1,598</td><td>4.56</td><td>15,237.5</td><td>28,315</td><td>32.3</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="section-title">实验结论</div>
+    <div class="conclusion">
+        <h3>1. Bloomberg TV 频道效果 <span class="tag tag-green">极显著</span></h3>
+        <ul>
+            <li>实验策略将 Bloomberg TV 的日均播放 UV 从约 100 提升至 2,000+（提升 20 倍）</li>
+            <li>频道人均播放时长从 1-2 分钟提升至 4-5 分钟，用户黏性同步增强</li>
+            <li>两个实验阶段效果一致，说明策略稳定可靠</li>
+        </ul>
+        <br>
+        <h3>2. 大盘影响 <span class="tag tag-gray">不显著</span></h3>
+        <ul>
+            <li>阶段一：大盘人均 +1.7%（37.2 → 37.8 min），统计不显著</li>
+            <li>阶段二：大盘人均 -2.9%（36.2 → 35.2 min），统计不显著（仅4天数据）</li>
+            <li>大盘 UV 实验组/对照组高度一致，流量分配均匀</li>
+            <li><strong>结论：实验对大盘没有明显的正向或负向影响，无显著挤出效应</strong></li>
+        </ul>
+        <br>
+        <h3>3. 建议</h3>
+        <ul>
+            <li>Bloomberg TV 引流策略效果确认，可考虑扩大流量或全量上线</li>
+            <li>如需确认大盘层面 2-3% 的微小变化是否真实，建议延长实验至 2-3 周</li>
+            <li>可进一步分析用户路径：从哪些入口进入 Bloomberg TV，是否有其他频道被挤占</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// Data
+const dates_phase1 = ['4.15', '4.16', '4.17', '4.18', '4.19', '4.20', '4.21'];
+const dates_phase2 = ['4.22', '4.23', '4.24', '4.25'];
+const allDates = [...dates_phase1, ...dates_phase2];
+
+const exp_bloomberg_uv = [706, 2238, 2210, 2697, 3157, 2479, 2221, 2195, 2061, 1961, 1598];
+const ctrl_bloomberg_uv = [33, 110, 123, 119, 130, 130, 98, 93, 88, 103, 98];
+
+const exp_bloomberg_hours = [51.8, 176.3, 177.7, 177.3, 208.3, 182.0, 211.6, 214.3, 139.4, 153.5, 121.5];
+const ctrl_bloomberg_hours = [0.27, 1.30, 3.58, 2.32, 0.73, 3.28, 1.90, 5.06, 4.42, 4.42, 1.43];
+
+const exp_es_avg = [36.6, 37.2, 37.7, 36.0, 36.7, 41.0, 39.6, 35.9, 36.8, 36.1, 32.3];
+const ctrl_es_avg = [35.1, 35.5, 36.7, 37.5, 35.2, 38.5, 41.7, 36.3, 37.9, 38.0, 33.1];
+
+const exp_es_uv = [28028, 27821, 27099, 29233, 30231, 27944, 27626, 25090, 24547, 24049, 28315];
+const ctrl_es_uv = [28053, 28078, 27118, 29135, 30648, 28021, 27640, 25085, 24840, 24087, 28271];
+
+const exp_es_hours = [17070.1, 17266.3, 17025.7, 17550.4, 18472.8, 19106.9, 18237.4, 15005.8, 15072.5, 14453.3, 15237.5];
+const ctrl_es_hours = [16408.0, 16617.0, 16589.5, 18223.4, 17981.0, 17991.2, 19219.6, 15190.5, 15677.8, 15258.8, 15606.1];
+
+const markAreaData = [[{xAxis: '4.22', itemStyle: {color: 'rgba(255,200,0,0.08)'}}, {xAxis: '4.25'}]];
+
+// Chart 1: Bloomberg UV
+var chart1 = echarts.init(document.getElementById('chart_bloomberg_uv'));
+chart1.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['实验组', '对照组'], top: 10 },
+    grid: { left: 60, right: 30, top: 50, bottom: 40 },
+    xAxis: { type: 'category', data: allDates, axisLabel: { fontSize: 12 } },
+    yAxis: [
+        { type: 'value', name: '实验组 UV', nameTextStyle: { color: '#4a90d9' } },
+        { type: 'value', name: '对照组 UV', nameTextStyle: { color: '#f97316' }, max: 200 }
+    ],
+    series: [
+        {
+            name: '实验组', type: 'bar', data: exp_bloomberg_uv,
+            itemStyle: { color: '#4a90d9', borderRadius: [4,4,0,0] },
+            markArea: { silent: true, data: markAreaData }
+        },
+        {
+            name: '对照组', type: 'line', yAxisIndex: 1, data: ctrl_bloomberg_uv,
+            lineStyle: { color: '#f97316', width: 2 },
+            itemStyle: { color: '#f97316' },
+            symbol: 'circle', symbolSize: 6
+        }
+    ]
+});
+
+// Chart 2: Bloomberg Hours
+var chart2 = echarts.init(document.getElementById('chart_bloomberg_hours'));
+chart2.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['实验组', '对照组'], top: 10 },
+    grid: { left: 60, right: 60, top: 50, bottom: 40 },
+    xAxis: { type: 'category', data: allDates },
+    yAxis: [
+        { type: 'value', name: '实验组(h)', nameTextStyle: { color: '#4a90d9' } },
+        { type: 'value', name: '对照组(h)', nameTextStyle: { color: '#f97316' }, max: 10 }
+    ],
+    series: [
+        {
+            name: '实验组', type: 'bar', data: exp_bloomberg_hours,
+            itemStyle: { color: '#4a90d9', borderRadius: [4,4,0,0] },
+            markArea: { silent: true, data: markAreaData }
+        },
+        {
+            name: '对照组', type: 'line', yAxisIndex: 1, data: ctrl_bloomberg_hours,
+            lineStyle: { color: '#f97316', width: 2 },
+            itemStyle: { color: '#f97316' },
+            symbol: 'circle', symbolSize: 6
+        }
+    ]
+});
+
+// Chart 3: ES Average Play Time
+var chart3 = echarts.init(document.getElementById('chart_es_avg'));
+chart3.setOption({
+    tooltip: { trigger: 'axis', formatter: function(params) {
+        let s = params[0].axisValue + '<br>';
+        params.forEach(p => { s += p.marker + p.seriesName + ': ' + p.value.toFixed(1) + ' min<br>'; });
+        return s;
+    }},
+    legend: { data: ['实验组', '对照组'], top: 10 },
+    grid: { left: 60, right: 30, top: 50, bottom: 40 },
+    xAxis: { type: 'category', data: allDates },
+    yAxis: { type: 'value', name: '人均播放时长(min)', min: 28, max: 44 },
+    series: [
+        {
+            name: '实验组', type: 'line', data: exp_es_avg, smooth: true,
+            lineStyle: { color: '#4a90d9', width: 3 },
+            itemStyle: { color: '#4a90d9' },
+            areaStyle: { color: 'rgba(74,144,217,0.1)' },
+            markArea: { silent: true, data: markAreaData }
+        },
+        {
+            name: '对照组', type: 'line', data: ctrl_es_avg, smooth: true,
+            lineStyle: { color: '#f97316', width: 3 },
+            itemStyle: { color: '#f97316' },
+            areaStyle: { color: 'rgba(249,115,22,0.1)' }
+        }
+    ]
+});
+
+// Chart 4: ES UV
+var chart4 = echarts.init(document.getElementById('chart_es_uv'));
+chart4.setOption({
+    title: { text: '大盘日播放 UV', left: 'center', textStyle: { fontSize: 14 } },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['实验组', '对照组'], top: 30 },
+    grid: { left: 60, right: 20, top: 60, bottom: 30 },
+    xAxis: { type: 'category', data: allDates, axisLabel: { fontSize: 11 } },
+    yAxis: { type: 'value', name: 'UV', min: 20000 },
+    series: [
+        { name: '实验组', type: 'line', data: exp_es_uv, lineStyle: { color: '#4a90d9', width: 2 }, itemStyle: { color: '#4a90d9' }, smooth: true },
+        { name: '对照组', type: 'line', data: ctrl_es_uv, lineStyle: { color: '#f97316', width: 2 }, itemStyle: { color: '#f97316' }, smooth: true }
+    ]
+});
+
+// Chart 5: ES Total Hours
+var chart5 = echarts.init(document.getElementById('chart_es_hours'));
+chart5.setOption({
+    title: { text: '大盘日播放总时长', left: 'center', textStyle: { fontSize: 14 } },
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['实验组', '对照组'], top: 30 },
+    grid: { left: 70, right: 20, top: 60, bottom: 30 },
+    xAxis: { type: 'category', data: allDates, axisLabel: { fontSize: 11 } },
+    yAxis: { type: 'value', name: '小时(h)', min: 12000 },
+    series: [
+        { name: '实验组', type: 'line', data: exp_es_hours, lineStyle: { color: '#4a90d9', width: 2 }, itemStyle: { color: '#4a90d9' }, smooth: true },
+        { name: '对照组', type: 'line', data: ctrl_es_hours, lineStyle: { color: '#f97316', width: 2 }, itemStyle: { color: '#f97316' }, smooth: true }
+    ]
+});
+
+// Responsive
+window.addEventListener('resize', function() {
+    chart1.resize(); chart2.resize(); chart3.resize(); chart4.resize(); chart5.resize();
+});
+</script>
+</body>
+</html>
